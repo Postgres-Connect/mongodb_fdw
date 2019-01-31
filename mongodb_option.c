@@ -15,31 +15,7 @@
  *-------------------------------------------------------------------------
  */
 
-#include "postgres.h"
-#include "mongo_wrapper.h"
-#include "mongo_fdw.h"
-
-#include "access/reloptions.h"
-#include "catalog/pg_type.h"
-#include "commands/defrem.h"
-#include "commands/explain.h"
-#include "commands/vacuum.h"
-#include "foreign/fdwapi.h"
-#include "foreign/foreign.h"
-#include "nodes/makefuncs.h"
-#include "optimizer/cost.h"
-#include "optimizer/pathnode.h"
-#include "optimizer/plancat.h"
-#include "optimizer/planmain.h"
-#include "optimizer/restrictinfo.h"
-#include "utils/array.h"
-#include "utils/builtins.h"
-#include "utils/date.h"
-#include "utils/hsearch.h"
-#include "utils/lsyscache.h"
-#include "utils/rel.h"
-#include "utils/memutils.h"
-#include "miscadmin.h"
+#include "mongodb_fdw.h"
 
 static char * mongo_get_option_value(Oid foreignTableId, const char *optionName);
 

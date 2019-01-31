@@ -18,48 +18,42 @@
 MONGOC_VERSION=1.9.5
 JSONC_VERSION=0.13.1-20180305
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: autogen.sh --[with-legacy | with-master]"
-    exit
-fi
+
+function run_cmd()
+{
+    $1&>logfile
+    if [ $? ]
+    then
+        echo  "  - " $1 " OK"
+    else
+        echo  "  - " $1 " FAILED"
+        echo "Failed, look at the logfile"
+        exit 1
+    fi 
+}
 
 ###
 # Pull the latest version of Monggo C Driver's master branch
 #
 function checkout_mongo_driver
 {
-	rm -rf mongo-c-driver
-	wget https://github.com/mongodb/mongo-c-driver/releases/download/$MONGOC_VERSION/mongo-c-driver-$MONGOC_VERSION.tar.gz
-	tar -zxvf mongo-c-driver-$MONGOC_VERSION.tar.gz
-	mv mongo-c-driver-$MONGOC_VERSION mongo-c-driver
-	rm -rf mongo-c-driver-$MONGOC_VERSION.tar.gz
+    run_cmd "rm -rf lib/mongo-c-driver" 
+	run_cmd "wget https://github.com/mongodb/mongo-c-driver/releases/download/$MONGOC_VERSION/mongo-c-driver-$MONGOC_VERSION.tar.gz -P lib/"
+	run_cmd "tar -zxvf lib/mongo-c-driver-$MONGOC_VERSION.tar.gz -C lib/"
+	run_cmd "mv lib/mongo-c-driver-$MONGOC_VERSION lib/mongo-c-driver"
+	run_cmd "rm -rf lib/mongo-c-driver-$MONGOC_VERSION.tar.gz"
 }
 
-###
-# Pull the legacy branch from the Mongo C Driver's
-#
-function checkout_legacy_branch
-{
-	rm -rf mongo-c-driver
-	wget https://github.com/mongodb/mongo-c-driver/archive/v0.8.tar.gz
-	tar -zxvf v0.8.tar.gz
-	mv  mongo-c-driver-0.8 mongo-c-driver
-	rm -rf v0.8.tar.gz
-}
 ##
 # Pull the json-c library
 #
 function checkout_json_lib
 {
-	echo $PWD
-	rm -rf json-c
-	wget https://github.com/json-c/json-c/archive/json-c-$JSONC_VERSION.tar.gz
-	tar -zxvf json-c-$JSONC_VERSION.tar.gz
-	mv json-c-json-c-$JSONC_VERSION json-c
-	cd json-c
-	cd ..
-	rm -rf json-c-$JSONC_VERSION.tar.gz
-	echo $PWD
+	run_cmd "rm -rf lib/json-c"
+	run_cmd "wget https://github.com/json-c/json-c/archive/json-c-$JSONC_VERSION.tar.gz -P lib/"
+	run_cmd "tar -zxvf lib/json-c-$JSONC_VERSION.tar.gz -C lib/"
+	run_cmd "mv lib/json-c-json-c-$JSONC_VERSION lib/json-c"
+	run_cmd "rm -rf lib/json-c-$JSONC_VERSION.tar.gz"
 }
 
 
@@ -68,11 +62,11 @@ function checkout_json_lib
 #
 function install_json_lib
 {
-	cd json-c
-	sh ./autogen.sh
-	./configure CFLAGS='-fPIC'
-	make install
-	cd ..
+    cd lib/json-c
+	run_cmd "./autogen.sh"
+	run_cmd "./configure CFLAGS='-fPIC'"
+	run_cmd "make install"
+    cd ../../
 }
 
 ###
@@ -80,49 +74,26 @@ function install_json_lib
 #
 function install_mongoc_driver
 {
-	cd mongo-c-driver
-	./configure --with-libbson=auto --enable-ssl
-	make install
-	cd ..
+    cd lib/mongo-c-driver/
+	run_cmd "./configure --with-libbson=auto --enable-ssl"
+	run_cmd "make install"
+    cd ../../
 }
 
-###
-# Cleanup the system
-#
-function cleanup
+function install_mongodb_fdw 
 {
-	rm config.h
-	touch config.h
+    run_cmd "make install"
 }
 
-###
-# Create a config file and append #define META_DRIVER which will be
-# used in case of Meta Driver (master branch) option.
-#
-function create_config
-{
-	echo "#ifdef __CONFIG__" >> config.h
-	echo "#define META_DRIVER" >> config.h
-	echo "#endif" >> config.h
-}
-
-cleanup
-
-if [ "--with-legacy" = $1 ]; then
-	checkout_json_lib
-	checkout_legacy_branch
-	install_json_lib
-	cp Makefile.legacy Makefile
-	echo "Done"
-elif [ "--with-master" == $1 ]; then
-	checkout_mongo_driver
-	checkout_json_lib
-	install_mongoc_driver
-	install_json_lib
-	create_config
-	export PKG_CONFIG_PATH=mongo-c-driver/src/:mongo-c-driver/src/libbson/src
-	cp Makefile.meta Makefile
-	echo "Done"
-else
-	echo "Usage: autogen.sh --[with-legacy | with-master]"
-fi
+echo "Downloading mongoc driver ..."
+checkout_mongo_driver
+echo "Downloading json library ..."
+checkout_json_lib
+echo "Installing mongoc driver ..."
+install_mongoc_driver
+echo "Installing json library ..."
+install_json_lib
+echo "Compiling/Installing mongodb_fdw ..."
+install_mongodb_fdw 
+export PKG_CONFIG_PATH=lib/mongo-c-driver/src/:lib/mongo-c-driver/src/libbson/src
+echo "Finishid"

@@ -15,59 +15,7 @@
  *-------------------------------------------------------------------------
  */
 
-#include "postgres.h"
-#include "bson.h"
-#include "mongo_wrapper.h"
-#include "mongo_fdw.h"
-#include "mongo_query.h"
-
-#include "access/reloptions.h"
-#include "catalog/pg_type.h"
-#include "commands/defrem.h"
-#include "commands/explain.h"
-#include "commands/vacuum.h"
-#include "foreign/fdwapi.h"
-#include "foreign/foreign.h"
-#include "nodes/makefuncs.h"
-#include "optimizer/cost.h"
-#include "optimizer/pathnode.h"
-#include "optimizer/plancat.h"
-#include "optimizer/planmain.h"
-#include "optimizer/restrictinfo.h"
-#include "storage/ipc.h"
-#include "utils/array.h"
-#include "utils/builtins.h"
-#include "utils/date.h"
-#include "utils/hsearch.h"
-#include "utils/lsyscache.h"
-#include "utils/rel.h"
-#include "utils/memutils.h"
-#include "access/sysattr.h"
-#include "commands/defrem.h"
-#include "commands/explain.h"
-#include "commands/vacuum.h"
-#include "foreign/fdwapi.h"
-#include "funcapi.h"
-#include "miscadmin.h"
-#include "nodes/makefuncs.h"
-#include "nodes/nodeFuncs.h"
-#include "optimizer/cost.h"
-#include "optimizer/pathnode.h"
-#include "optimizer/paths.h"
-#include "optimizer/planmain.h"
-#include "optimizer/prep.h"
-#include "optimizer/restrictinfo.h"
-#include "optimizer/var.h"
-#include "parser/parsetree.h"
-#include "utils/builtins.h"
-#include "utils/guc.h"
-#include "utils/lsyscache.h"
-#include "utils/memutils.h"
-#include "utils/jsonapi.h"
-#include "utils/jsonb.h"
-#if PG_VERSION_NUM >= 90300
-	#include "access/htup_details.h"
-#endif
+#include "mongodb_fdw.h"
 
 /*
  * In PG 9.5.1 the number will be 90501,
@@ -990,13 +938,8 @@ MongoExecForeignUpdate(EState *estate,
 				elog(ERROR, "system column '__doc' update is not supported");
 
 			value = slot_getattr(slot, attnum, &isnull);
-#ifdef META_DRIVER
 			AppenMongoValue(&set, attr->attname.data, value,
 							isnull ? true : false, attr->atttypid);
-#else
-			AppenMongoValue(b, attr->attname.data, value,
-							isnull ? true : false, attr->atttypid);
-#endif
 		}
 	}
 	BsonAppendFinishObject(b, &set);
@@ -1434,12 +1377,10 @@ ColumnTypesCompatible(BSON_TYPE bsonType, Oid columnTypeId)
 			{
 				compatibleTypes = true;
 			}
-#ifdef META_DRIVER
 			if (bsonType == BSON_TYPE_OID)
 			{
 				compatibleTypes = true;
 			}
-#endif
 			break;
 		}
 		case NAMEOID:
@@ -1652,7 +1593,6 @@ ColumnValue(BSON_ITERATOR *bsonIterator, Oid columnTypeId, int32 columnTypeMod)
 			int value_len;
 			char *value;
 			bytea *result;
-#ifdef META_DRIVER
 			switch (BsonIterType(bsonIterator))
 			{
 				case BSON_TYPE_OID:
@@ -1663,10 +1603,6 @@ ColumnValue(BSON_ITERATOR *bsonIterator, Oid columnTypeId, int32 columnTypeMod)
 					value = (char*)BsonIterBinData(bsonIterator, (uint32_t *)&value_len);
 					break;
 			}
-#else
-			value_len = BsonIterBinLen(bsonIterator);
-			value = (char*)BsonIterBinData(bsonIterator);
-#endif
 			result = (bytea *)palloc(value_len + VARHDRSZ);
 			memcpy(VARDATA(result), value, value_len);
 			SET_VARSIZE(result, value_len + VARHDRSZ);
@@ -1696,20 +1632,16 @@ ColumnValue(BSON_ITERATOR *bsonIterator, Oid columnTypeId, int32 columnTypeMod)
 		{
 			JsonLexContext *lex;
 			text           *result;
-			StringInfo     buffer = makeStringInfo();
+			char           buffer[1024];
+            int            len;    
 
 			BSON_TYPE type = BSON_ITER_TYPE(bsonIterator);
 			if (type != BSON_TYPE_ARRAY && type != BSON_TYPE_DOCUMENT)
 				ereport(ERROR, (errmsg("cannot convert scolar to json")));
 
-#ifdef META_DRIVER
 			/* Convert BSON to JSON value */
-			BsonToJsonStringValue(buffer, bsonIterator, BSON_TYPE_ARRAY == type);
-#else
-			/* Convert BSON to JSON value */
-			BsonToJsonString(buffer, *bsonIterator, BSON_TYPE_ARRAY == type);
-#endif
-			result = cstring_to_text_with_len(buffer->data, buffer->len);
+			len = BsonToJsonStringValue(buffer, bsonIterator, BSON_TYPE_ARRAY == type);
+			result = cstring_to_text_with_len(buffer, len);
 			lex = makeJsonLexContext(result, false);
 			pg_parse_json(lex, &nullSemAction);
 			columnValue = PointerGetDatum(result);
@@ -1742,12 +1674,10 @@ BsonToJsonString(StringInfo output, BSON_ITERATOR i, bool isArray)
 		endSymbol = ']';
 	}
 
-#ifndef META_DRIVER
 	{
-		char *bsonData = bson_iterator_value(&i);
-		bson_iterator_from_buffer(&i, bsonData);
+		const char *bsonData = BsonIterValue(&i);
+		BsonIteratorFromBuffer(&i, bsonData);
 	}
-#endif
 
 	appendStringInfoChar(output, beginSymbol);
 
@@ -1784,7 +1714,7 @@ BsonToJsonString(StringInfo output, BSON_ITERATOR i, bool isArray)
 			case BSON_TYPE_OID:
 			{
 				char oidhex[25];
-				BsonOidToString(BsonIterOid(&i), (char**)&oidhex);
+				BsonOidToString(BsonIterOid(&i), (char*)&oidhex);
 				appendStringInfo(output, "{\"$oid\":\"%s\"}", oidhex);
 				break;
 			}
@@ -2005,7 +1935,6 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 	bool                     *columnNulls = NULL;
 	Oid                      foreignTableId = InvalidOid;
 	TupleDesc                tupleDescriptor = NULL;
-	Form_pg_attribute        *attributesPtr = NULL;
 	AttrNumber               columnCount = 0;
 	AttrNumber               columnId = 0;
 	HTAB                     *columnMappingHash = NULL;
@@ -2024,7 +1953,6 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 	/* create list of columns in the relation */
 	tupleDescriptor = RelationGetDescr(relation);
 	columnCount = tupleDescriptor->natts;
-	attributesPtr = tupleDescriptor->attrs;
 
 	for (columnId = 1; columnId <= columnCount; columnId++)
 	{
@@ -2032,8 +1960,8 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 
 		/* only assign required fields for column mapping hash */
 		column->varattno = columnId;
-		column->vartype = attributesPtr[columnId-1]->atttypid;
-		column->vartypmod = attributesPtr[columnId-1]->atttypmod;
+		column->vartype = tupleDescriptor->attrs[columnId-1].atttypid;
+		column->vartypmod = tupleDescriptor->attrs[columnId-1].atttypmod;
 
 		columnList = lappend(columnList, column);
 	}
@@ -2107,7 +2035,6 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 		}
 		else
 		{
-			#ifdef META_DRIVER
 			bson_error_t error;
 			if (mongoc_cursor_error (mongoCursor, &error))
 			{
@@ -2115,15 +2042,6 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 				ereport(ERROR, (errmsg("could not iterate over mongo collection"),
 						errhint("Mongo driver error: %s", error.message)));
 			}
-			#else
-				mongo_cursor_error_t errorCode = mongoCursor->err;
-				if (errorCode != MONGO_CURSOR_EXHAUSTED)
-				{
-					MongoFreeScanState(fmstate);
-					ereport(ERROR, (errmsg("could not iterate over mongo collection"),
-							errhint("Mongo driver cursor error code: %d", errorCode)));
-				}
-			#endif
 			break;
 		}
 
