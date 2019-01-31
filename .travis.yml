@@ -22,6 +22,10 @@ install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
   - sudo pip install cpp-coveralls
+  - sudo apt-get install libbson-1.0
+  - sudo apt-get install libmongoc-1.0-0
+  - sudo apt-get install cmake libssl-dev libsasl2-dev
+  - sudo apt-get install libjson-c-dev
   - install_pg
   - install_custom_pg
 before_script:
