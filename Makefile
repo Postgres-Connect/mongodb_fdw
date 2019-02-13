@@ -7,7 +7,7 @@ MONGO_FLAGS=$(shell pkg-config --cflags libmongoc-1.0)
 JSON_FLAGS=$(shell pkg-config --cflags json-c)
 
 PG_CPPFLAGS:=$(BSON_FLAGS) $(MONGO_FLAGS) $(JSON_FLAGS) $(PG_CONFIG) -Ilib
-SHLIB_LINK_INTERNAL = -Llib -lmongodb_client-1.0 
+SHLIB_LINK_INTERNAL = -lmongodb_client-1.0 
 
 EXTENSION = mongodb_fdw
 DATA = mongodb_fdw--1.0.sql
