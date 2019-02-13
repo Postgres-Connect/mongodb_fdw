@@ -26,6 +26,7 @@ install:
   - sudo apt-get install libmongoc-1.0-0
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
+  - sudo -s find / -iname libbson-1.0.pc
   - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/lib/x86_64-linux-gnu/pkgconfig/
   - install_pg
   - install_custom_pg
