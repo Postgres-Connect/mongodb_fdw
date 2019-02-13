@@ -25,7 +25,7 @@ install:
   - ./autogen.sh  
   - ls -lrt /usr/local/lib/pkgconfig/
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-  - make -f lib/Makefile
+  - make libcompile
   - install_pg
   - install_custom_pg
 before_script:
