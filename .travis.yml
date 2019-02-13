@@ -22,9 +22,10 @@ install:
   - sudo pip install cpp-coveralls
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
-  - ./autogen.sh  
-  - ls -lrt /usr/local/lib/pkgconfig/
+  - ./autogen.sh
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+  - pwd
+  - ls -lrt  
   - make libcompile
   - install_pg
   - install_custom_pg
