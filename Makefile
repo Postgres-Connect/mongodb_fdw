@@ -14,12 +14,10 @@ DATA = mongodb_fdw--1.0.sql
 
 REGRESS = mongodb_fdw
 
-ifdef USE_PGXS
 PG_CONFIG = pg_config
 LIBDIR := $(shell $(PG_CONFIG) --libdir)
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
-endif
 
 all:	libclean libcompile libinstall
 

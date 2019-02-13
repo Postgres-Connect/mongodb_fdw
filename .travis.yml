@@ -24,7 +24,6 @@ install:
   - sudo apt-get install libjson-c-dev
   - ./autogen.sh
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-  - make -f /home/travis/build/Postgres-Connect/mongodb_fdw/Makefile libcompile
   - install_pg
   - install_custom_pg
 before_script:
