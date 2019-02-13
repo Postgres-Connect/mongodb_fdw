@@ -11,8 +11,6 @@ env:
     - PG_PRELOAD=mongodb_fdw
   matrix:
     - PGVERSION=9.6
-    - PGVERSION=10
-    - PGVERSION=11
 before_install:
   - git clone -b v0.7.9 --depth 1 https://github.com/citusdata/tools.git
   - sudo make -C tools install
@@ -22,7 +20,7 @@ install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
   - sudo pip install cpp-coveralls
-  - sudo cat "deb http://cz.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list   
+  - sudo echo "deb http://cz.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list   
   - sudo apt-get update  
   - sudo apt-get install libbson-1.0
   - sudo apt-get install libmongoc-1.0-0
