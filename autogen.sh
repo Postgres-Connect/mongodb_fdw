@@ -65,7 +65,7 @@ function install_json_lib
     cd lib/json-c
 	run_cmd "./autogen.sh"
 	run_cmd "./configure CFLAGS='-fPIC'"
-	run_cmd "make install"
+	run_cmd "sudo -s make install"
     cd ../../
 }
 
@@ -76,13 +76,13 @@ function install_mongoc_driver
 {
     cd lib/mongo-c-driver/
 	run_cmd "./configure --with-libbson=auto --enable-ssl"
-	run_cmd "make install"
+	run_cmd "sudo -s make install"
     cd ../../
 }
 
 function install_mongodb_fdw 
 {
-    run_cmd "make install"
+    run_cmd "sudo -s make install"
 }
 
 echo "Downloading mongoc driver ..."
