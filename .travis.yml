@@ -22,6 +22,7 @@ install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
   - sudo pip install cpp-coveralls
+  - sudo cat "deb http://cz.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list   
   - sudo apt-get update  
   - sudo apt-get install libbson-1.0
   - sudo apt-get install libmongoc-1.0-0
