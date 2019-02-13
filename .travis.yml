@@ -22,8 +22,7 @@ install:
   - sudo pip install cpp-coveralls
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
-  - ls -lrt
-  - ./auto_gen.sh  
+  - ./autogen.sh  
   - install_pg
   - install_custom_pg
 before_script:
