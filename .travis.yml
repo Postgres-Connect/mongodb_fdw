@@ -19,15 +19,13 @@ before_install:
 install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
-  - sudo apt-get install gcc
+  - sudo apt-get install mongo-tools mongodb mongodb-clients mongodb-server mongodb-server-core
   - sudo pip install cpp-coveralls
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
   - ./autogen.sh
-  - ls -lrt /usr/local/lib/*
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
   - export LD_LIBRARY_PATH=/usr/local/lib/
-  - make LIB=1 libcompile
   - install_pg
   - sudo chmod 555 /usr/local/lib/* 
   - sudo ldconfig
