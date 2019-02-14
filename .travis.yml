@@ -25,11 +25,12 @@ install:
   - sudo apt-get install libjson-c-dev
   - ./autogen.sh
   - ls -lrt /usr/local/lib/*
-  - ldd /home/travis/build/Postgres-Connect/mongodb_fdw/mongodb_fdw.so 
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
   - export LD_LIBRARY_PATH=/usr/local/lib/
   - make LIB=1 libcompile
   - install_pg
+  - make
+  - ldd /home/travis/build/Postgres-Connect/mongodb_fdw/mongodb_fdw.so 
   - install_custom_pg
 before_script:
   - config_and_start_cluster
