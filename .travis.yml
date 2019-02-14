@@ -30,7 +30,7 @@ install:
   - make LIB=1 libcompile  
   - sudo chmod 555 /usr/local/lib/* 
   - sudo ldconfig
-  - sudo -s service mongod status
+  - sudo -s service mongod start
   - install_custom_pg
 before_script:
   - config_and_start_cluster
