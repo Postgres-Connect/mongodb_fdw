@@ -4,7 +4,10 @@ ALTER USER postgres WITH SUPERUSER;
 \c contrib_regression postgres 
 CREATE EXTENSION mongodb_fdw;
 CREATE SERVER mongo_server FOREIGN DATA WRAPPER mongo_fdw OPTIONS (address '127.0.0.1', port '27017');
-\! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop --quiet < data/mongo_fixture.json
+\! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop  < data/mongo_fixture.json
+2019-02-14T20:46:34.947+0000	connected to: localhost
+2019-02-14T20:46:34.947+0000	dropping: mongo_fdw_regress.countries
+2019-02-14T20:46:35.001+0000	imported 3 documents
 CREATE USER MAPPING FOR postgres SERVER mongo_server;
 CREATE FOREIGN TABLE department(_id NAME, department_id int, department_name text) SERVER mongo_server OPTIONS(database 'testdb', collection 'department');
 CREATE FOREIGN TABLE employee(_id NAME, emp_id int, emp_name text, emp_dept_id int) SERVER mongo_server OPTIONS(database 'testdb', collection 'employee');
