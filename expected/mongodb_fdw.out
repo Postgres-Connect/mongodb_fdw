@@ -1,4 +1,7 @@
-\c postgres postgres
+DROP USER IF EXISTS postgres;
+CREATE USER postgres;
+ALTER USER postgres WITH SUPERUSER;
+\c contrib_regression postgres 
 CREATE EXTENSION mongodb_fdw;
 CREATE SERVER mongo_server FOREIGN DATA WRAPPER mongo_fdw OPTIONS (address '127.0.0.1', port '27017');
 \! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop --quiet < data/mongo_fixture.json
