@@ -48,7 +48,7 @@ population INTEGER,
 capital VARCHAR,
 hdi FLOAT
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM countries;
+SELECT * FROM countries ORDER BY name;
 -- 
 -- Subfields and dates
 CREATE FOREIGN TABLE country_elections (
@@ -56,14 +56,14 @@ _id NAME,
 "lastElections.type" VARCHAR,
 "lastElections.date" TIMESTAMP
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM country_elections;
+SELECT * FROM country_elections ORDER BY "lastElections.type","lastElections.date";
 -- 
 -- Arrays
 CREATE FOREIGN TABLE main_exports (
 _id NAME,
 "mainExports" TEXT[]
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM main_exports;
+SELECT * FROM main_exports order by "mainExports";
 
 -- __doc tests
 
