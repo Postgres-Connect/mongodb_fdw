@@ -75,7 +75,7 @@ function install_json_lib
 function install_mongoc_driver
 {
     cd lib/mongo-c-driver/
-	run_cmd "./configure --with-libbson=auto --enable-ssl"
+	run_cmd "./configure --with-libbson=auto --enable-ssl --prefix=/usr/local/lib"
 	run_cmd "sudo -s make install"
     cd ../../
 }
