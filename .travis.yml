@@ -31,7 +31,7 @@ install:
   - sudo chmod 555 /usr/local/lib/* 
   - sudo ldconfig
   - sudo -s service mongod start
- - sleep 10
+ - sleep 15
   - sudo -s service mongod status
   - install_custom_pg
 before_script:
