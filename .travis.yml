@@ -19,7 +19,7 @@ before_install:
 install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
-  - sudo apt-get install mongo-tools mongodb mongodb-clients mongodb-server mongodb-server-core
+  - sudo apt-get install mongo-tools mongodb mongodb-clients mongodb-server
   - sudo pip install cpp-coveralls
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
