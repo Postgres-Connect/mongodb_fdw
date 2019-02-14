@@ -30,7 +30,7 @@ install:
   - make LIB=1 libcompile
   - install_pg
   - sudo chmod 555 /usr/local/lib/* 
-  - ldconfig
+  - sudo ldconfig
   - install_custom_pg
 before_script:
   - config_and_start_cluster
