@@ -31,4 +31,4 @@ libcompile:
 
 libinstall:
 	$(MAKE) -f lib/Makefile
-	/usr/bin/install -c -m 755 libmongodb_client-1.0.so $(LIBDIR)/libmongodb_client-1.0.so
+	sudo /usr/bin/install -c -m 755 libmongodb_client-1.0.so $(LIBDIR)/libmongodb_client-1.0.so
