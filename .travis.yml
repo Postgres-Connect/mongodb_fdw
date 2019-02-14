@@ -30,7 +30,6 @@ install:
   - make LIB=1 libcompile
   - install_pg
   - install_custom_pg
-  - ldd /usr/lib/postgresql/9.6/lib/mongodb_fdw.so
 before_script:
   - config_and_start_cluster
 script: pg_travis_test
