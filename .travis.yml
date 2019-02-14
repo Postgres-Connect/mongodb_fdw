@@ -24,6 +24,7 @@ install:
   - sudo apt-get install libjson-c-dev
   - ./autogen.sh
   - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+  - export LD_LIBRARY_PATH=/usr/local/lib/
   - make LIB=1 libcompile
   - install_pg
   - install_custom_pg
