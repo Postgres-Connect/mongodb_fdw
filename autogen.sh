@@ -21,15 +21,16 @@ JSONC_VERSION=0.13.1-20180305
 
 function run_cmd()
 {
-    $1&>logfile
-    if [ $? ]
-    then
-        echo  "  - " $1 " OK"
-    else
-        echo  "  - " $1 " FAILED"
-        echo "Failed, look at the logfile"
-        exit 1
-    fi 
+    $1
+    #$1&>logfile
+    #if [ $? ]
+    #then
+    #    echo  "  - " $1 " OK"
+    #else
+    #    echo  "  - " $1 " FAILED"
+    #    echo "Failed, look at the logfile"
+    #    exit 1
+    #fi 
 }
 
 ###
@@ -65,6 +66,7 @@ function install_json_lib
     cd lib/json-c
 	run_cmd "./autogen.sh"
 	run_cmd "./configure CFLAGS='-fPIC'"
+	run_cmd "make"
 	run_cmd "sudo -s make install"
     cd ../../
 }
@@ -75,7 +77,8 @@ function install_json_lib
 function install_mongoc_driver
 {
     cd lib/mongo-c-driver/
-	run_cmd "./configure --with-libbson=auto --enable-ssl --prefix=/usr/local/lib"
+	run_cmd "./configure --with-libbson=auto --enable-ssl --prefix=/usr/local/"
+	run_cmd "make"
 	run_cmd "sudo -s make install"
     cd ../../
 }
