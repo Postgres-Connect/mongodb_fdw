@@ -84,7 +84,8 @@ function install_mongoc_driver
 
 function install_mongodb_fdw 
 {
-    run_cmd "make install"
+    make
+    make install
 }
 
 echo "Downloading mongoc driver ..."
