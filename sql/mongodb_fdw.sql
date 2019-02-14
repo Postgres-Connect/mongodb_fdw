@@ -4,14 +4,14 @@ ALTER USER postgres WITH SUPERUSER;
 \c contrib_regression postgres 
 CREATE EXTENSION mongodb_fdw;
 CREATE SERVER mongo_server FOREIGN DATA WRAPPER mongo_fdw OPTIONS (address '127.0.0.1', port '27017');
-\! mongoimport --quiet --db mongo_fdw_regress --collection countries --jsonArray --drop  < data/mongo_fixture.json
+\! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop  < data/mongo_fixture.json 2>/dev/null
 CREATE USER MAPPING FOR postgres SERVER mongo_server;
 
 CREATE FOREIGN TABLE department(_id NAME, department_id int, department_name text) SERVER mongo_server OPTIONS(database 'testdb', collection 'department');
 CREATE FOREIGN TABLE employee(_id NAME, emp_id int, emp_name text, emp_dept_id int) SERVER mongo_server OPTIONS(database 'testdb', collection 'employee');
 
 INSERT INTO department VALUES(0, generate_series(1,10), 'dept - ' || generate_series(1,10));
-INSERT INTO employee VALUES(0, generate_series(1,100), 'emp - ' || generate_series(1,100), generate_series(1,10));
+INSERT INTO employee VALUES(0, generate_series(1,100), 'emp - ' || generate_series(1,100), generate_series(1,100)%10);
 
 SELECT count(*) FROM department;
 SELECT count(*) FROM employee;
