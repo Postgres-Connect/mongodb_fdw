@@ -29,7 +29,7 @@ install:
   - export LD_LIBRARY_PATH=/usr/local/lib/
   - make LIB=1 libcompile
   - install_pg
-  - cp /usr/local/lib/* /usr/lib/postgresql/9.6/lib/
+  - sudo -s cp -rf /usr/local/lib/* /usr/lib/postgresql/9.6/lib/
   - ls -lrt /usr/lib/postgresql/9.6/lib/*
   - install_custom_pg
 before_script:
