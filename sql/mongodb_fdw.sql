@@ -1,4 +1,3 @@
-DROP USER IF EXISTS postgres;
 CREATE USER postgres;
 ALTER USER postgres WITH SUPERUSER;
 \c contrib_regression postgres 

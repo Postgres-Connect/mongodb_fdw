@@ -1,5 +1,5 @@
-DROP USER IF EXISTS postgres;
 CREATE USER postgres;
+ERROR:  role "postgres" already exists
 ALTER USER postgres WITH SUPERUSER;
 \c contrib_regression postgres 
 CREATE EXTENSION mongodb_fdw;
