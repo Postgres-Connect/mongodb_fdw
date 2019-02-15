@@ -11,6 +11,8 @@ env:
     - PG_PRELOAD=mongodb_fdw
   matrix:
     - PGVERSION=9.6
+    - PGVERSION=10
+    - PGVERSION=11
 before_install:
   - git clone -b v0.7.9 --depth 1 https://github.com/citusdata/tools.git
   - sudo make -C tools install
