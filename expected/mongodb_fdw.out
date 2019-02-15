@@ -1,4 +1,5 @@
 DROP USER IF EXISTS postgres;
+NOTICE:  role "postgres" does not exist, skipping
 CREATE USER postgres;
 ALTER USER postgres WITH SUPERUSER;
 \c contrib_regression postgres 
