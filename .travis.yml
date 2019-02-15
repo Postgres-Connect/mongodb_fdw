@@ -20,7 +20,6 @@ install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
   - mongo --version
-  - sudo apt-get install mongodb mongodb-clients mongodb-server
   - sudo pip install cpp-coveralls
   - sudo apt-get install cmake libssl-dev libsasl2-dev
   - sudo apt-get install libjson-c-dev
