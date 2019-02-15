@@ -11,8 +11,6 @@ env:
     - PG_PRELOAD=mongodb_fdw
   matrix:
     - PGVERSION=9.6
-    - PGVERSION=10
-    - PGVERSION=11
 before_install:
   - git clone -b v0.7.9 --depth 1 https://github.com/citusdata/tools.git
   - sudo make -C tools install
@@ -21,8 +19,18 @@ before_install:
 install:
   - sudo locale-gen da_DK
   - sudo locale-gen da_DK.utf8
+  - mongo --version
+  - sudo service mongod start
   - sudo pip install cpp-coveralls
+  - sudo apt-get install cmake libssl-dev libsasl2-dev
+  - sudo apt-get install libjson-c-dev
+  - ./autogen.sh
+  - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+  - export LD_LIBRARY_PATH=/usr/local/lib/
   - install_pg
+  - make LIB=1 libcompile  
+  - sudo chmod 555 /usr/local/lib/* 
+  - sudo ldconfig
   - install_custom_pg
 before_script:
   - config_and_start_cluster

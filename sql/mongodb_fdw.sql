@@ -1,29 +1,37 @@
-\c postgres postgres
-CREATE EXTENSION mongo_fdw;
+DROP USER IF EXISTS postgres;
+CREATE USER postgres;
+ALTER USER postgres WITH SUPERUSER;
+\c contrib_regression postgres 
+CREATE EXTENSION mongodb_fdw;
 CREATE SERVER mongo_server FOREIGN DATA WRAPPER mongo_fdw OPTIONS (address '127.0.0.1', port '27017');
-\! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop --quiet < data/mongo_fixture.json
+\! mongoimport --db mongo_fdw_regress --collection countries --jsonArray --drop  < data/mongo_fixture.json >/dev/null 2>&1
+
+
 CREATE USER MAPPING FOR postgres SERVER mongo_server;
 
 CREATE FOREIGN TABLE department(_id NAME, department_id int, department_name text) SERVER mongo_server OPTIONS(database 'testdb', collection 'department');
 CREATE FOREIGN TABLE employee(_id NAME, emp_id int, emp_name text, emp_dept_id int) SERVER mongo_server OPTIONS(database 'testdb', collection 'employee');
 
+DELETE FROM department;
+DELETE FROM employee;
+
 INSERT INTO department VALUES(0, generate_series(1,10), 'dept - ' || generate_series(1,10));
-INSERT INTO employee VALUES(0, generate_series(1,100), 'emp - ' || generate_series(1,100), generate_series(1,10));
+INSERT INTO employee VALUES(0, generate_series(1,100), 'emp - ' || generate_series(1,100), generate_series(1,100)%10);
 
 SELECT count(*) FROM department;
 SELECT count(*) FROM employee;
 
 EXPLAIN (COSTS FALSE) SELECT emp_id , emp_name , emp_dept_id, department_id , department_name  FROM department d, employee e WHERE d.department_id = e.emp_dept_id ORDER by emp_id;
 
-EXPLAIN (COSTS FALSE) SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id IN (SELECT department_id FROM department) ORDER by emp_id;
+EXPLAIN (COSTS FALSE) SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id IN (SELECT department_id FROM department) ORDER by emp_id,emp_name,emp_dept_id,department_id;
 
-SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id = e.emp_dept_id ORDER by emp_id;
-SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id IN (SELECT department_id FROM department) ORDER by emp_id;
+SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id = e.emp_dept_id ORDER by emp_id,emp_name,emp_dept_id,department_id;
+SELECT emp_id , emp_name , emp_dept_id, department_id , department_name FROM department d, employee e WHERE d.department_id IN (SELECT department_id FROM department) ORDER by emp_id,emp_name,emp_dept_id,department_id;
 
 DELETE FROM employee WHERE emp_id = 10;
 
 UPDATE employee SET emp_name = 'Updated emp' WHERE emp_id = 20;
-SELECT emp_id, emp_name FROM employee WHERE emp_name like 'Updated emp';
+SELECT emp_id, emp_name FROM employee WHERE emp_name like 'Updated emp' ORDER BY emp_id;
 
 SELECT emp_id , emp_name , emp_dept_id FROM employee ORDER by emp_id LIMIT 10;
 SELECT emp_id , emp_name , emp_dept_id FROM employee WHERE emp_id IN (1) ORDER by emp_id;
@@ -48,7 +56,7 @@ population INTEGER,
 capital VARCHAR,
 hdi FLOAT
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM countries;
+SELECT * FROM countries ORDER BY name;
 -- 
 -- Subfields and dates
 CREATE FOREIGN TABLE country_elections (
@@ -56,14 +64,14 @@ _id NAME,
 "lastElections.type" VARCHAR,
 "lastElections.date" TIMESTAMP
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM country_elections;
+SELECT * FROM country_elections ORDER BY "lastElections.type","lastElections.date";
 -- 
 -- Arrays
 CREATE FOREIGN TABLE main_exports (
 _id NAME,
 "mainExports" TEXT[]
 ) SERVER mongo_server OPTIONS (database 'mongo_fdw_regress', collection 'countries');
-SELECT * FROM main_exports;
+SELECT * FROM main_exports order by "mainExports";
 
 -- __doc tests
 
@@ -145,4 +153,4 @@ DROP FOREIGN TABLE countries;
 DROP FOREIGN TABLE country_elections;
 DROP FOREIGN TABLE main_exports;
 DROP USER MAPPING FOR postgres SERVER mongo_server;
-DROP EXTENSION mongo_fdw CASCADE;
+DROP EXTENSION mongodb_fdw CASCADE;

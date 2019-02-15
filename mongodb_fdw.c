@@ -1960,9 +1960,13 @@ MongoAcquireSampleRows(Relation relation, int errorLevel,
 
 		/* only assign required fields for column mapping hash */
 		column->varattno = columnId;
+#if PG_VERSION_NUM < 110000
+		column->vartype = tupleDescriptor->attrs[columnId-1]->atttypid;
+		column->vartypmod = tupleDescriptor->attrs[columnId-1]->atttypmod;
+#else
 		column->vartype = tupleDescriptor->attrs[columnId-1].atttypid;
 		column->vartypmod = tupleDescriptor->attrs[columnId-1].atttypmod;
-
+#endif
 		columnList = lappend(columnList, column);
 	}
 
